@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres
+    container_name: inventory_postgres
+    restart: always
+    volumes:
+      - /root/task/data/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    command: -p 5432
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventorypass123
+  fastapi:
+    build: .
+    container_name: inventory_fastapi
+    depends_on:
+      - db
+    volumes:
+      - /root/task/app:/root/task/app
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    working_dir: /root/task
+    stdin_open: true
+    tty: true
+networks:
+  default:
+    driver: bridge
